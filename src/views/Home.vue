@@ -102,7 +102,7 @@
         <v-col cols="1"></v-col>
         <v-col cols="10" class="saiba">
 
-          <h1>dkjhgfsdjkh{{infos.nome}}</h1>
+          <h1>dkjhgfsdjkh{{infos.nome}}fsdfafa</h1>
         </v-col>
       </v-row>
       <v-row>
