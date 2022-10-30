@@ -4,14 +4,14 @@
       <h2>Perfil</h2>
     </v-card-title>
     <v-row>
-      <v-col cols="3">
+      <v-col cols="3" v-for="info in infos" :key="info.id">
         <v-divider color="#B2DFE1"></v-divider>
         <v-card-subtitle>
-          Nome: dsfdsg
+         <h3> Nome: {{info.nomeuser}}</h3>
         </v-card-subtitle>
         <v-divider color="#B2DFE1"></v-divider>
         <v-card-subtitle>
-          <h3>Email: {{infos}} </h3>
+          <h3>Email: {{info.email}} </h3>
         </v-card-subtitle>
         <v-divider color="#B2DFE1"></v-divider>
         <v-card-subtitle>
@@ -19,7 +19,7 @@
         </v-card-subtitle>
         <v-divider color="#B2DFE1"></v-divider>
         <v-card-subtitle>
-          <h3>Gênero: </h3>
+          <h3>Gênero: {{info.genero}} </h3>
         </v-card-subtitle>
         <v-divider color="#B2DFE1"></v-divider>
       </v-col>
@@ -106,8 +106,9 @@
 
 <script>
 import imcresultado from "./IMC_resultado.vue";
-import { getAuth} from "firebase/auth";
 import * as fb from '@/plugins/firebase'
+import { getAuth} from "firebase/auth";
+
 export default {
   components: { imcresultado },
   data() {
@@ -128,21 +129,21 @@ export default {
     },
     async puxaruser(){
       this.infos = [];
-      const auth = getAuth();
-      this.uid = auth.currentUser.uid;
-      const Perfil = await fb.PerfilCollection.where("owner","==",this.uid).get();
-      const user = auth.currentUser;
-      const email = user.email;
+      this.uid = fb.auth.currentUser.uid;
+        const logPerfilUser = await fb.PerfilCollection.where("owner","==",this.uid).get();
+        const auth = getAuth();
+        const user = auth.currentUser;
+        const email = user.email;
+        for (const doc of logPerfilUser.docs) {
+          this.infos.push({
+            nomeuser: doc.data().Nome,
+            genero: doc.data().Genero,
+            email: email,
+          })
+        }
+
       
-    for ( const doc of Perfil) {
-  // The user object has basic properties such as display name, email, etc.
-  this.infos.push({
-    nomeuser: doc.data().Nome,
-    email: email,
-  })
-}
-      
-      }
+      },
     }
   };
 </script>

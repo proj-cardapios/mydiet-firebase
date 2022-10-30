@@ -102,7 +102,7 @@
         <v-col cols="1"></v-col>
         <v-col cols="10" class="saiba">
 
-          <h1>dkjhgfsdjkh{{infos.nome}}fsdfafa</h1>
+          <PrfilCard></PrfilCard>
         </v-col>
       </v-row>
       <v-row>
@@ -159,17 +159,19 @@ mounted(){
 },
   methods: {
     async puxaruser(){
-      const auth = getAuth();
-      this.uid = auth.currentUser.uid;
-      const Perfil = await fb.PerfilCollection.where("owner","==",this.uid).get();
-      const user = auth.currentUser;
-      const email = user.email;
-      for ( const doc of Perfil.docs) {
-        this.infos.push({
-          nomeuser: doc.data().Nome,
-          email: email,
-  })
-}
+      this.infos = [];
+      this.uid = fb.auth.currentUser.uid;
+        const logPerfilUser = await fb.PerfilCollection.where("owner","==",this.uid).get();
+        const auth = getAuth();
+        const user = auth.currentUser;
+        const email = user.email;
+        for (const doc of logPerfilUser.docs) {
+          this.infos.push({
+            nomeempresa: doc.data().nomeEmpresa,
+            cnpj: doc.data().CNPJ,
+            email: email,
+          })
+        }
 
       
       },
