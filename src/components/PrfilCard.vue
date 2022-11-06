@@ -3,8 +3,8 @@
     <v-card-title>
       <h2>Perfil</h2>
     </v-card-title>
-    <v-row>
-      <v-col cols="3" v-for="info in infos" :key="info.id">
+    <v-row v-for="info in infos" :key="info.id">
+      <v-col cols="3" >
         <v-divider color="#B2DFE1"></v-divider>
         <v-card-subtitle>
          <h3> Nome: {{info.nomeuser}}</h3>
@@ -15,7 +15,7 @@
         </v-card-subtitle>
         <v-divider color="#B2DFE1"></v-divider>
         <v-card-subtitle>
-          <h3>Idade: anos</h3>
+          <h3>Idade: {{(new Date().getFullYear() - info.idade.split("-")[0])}} anos</h3>
         </v-card-subtitle>
         <v-divider color="#B2DFE1"></v-divider>
         <v-card-subtitle>
@@ -26,11 +26,11 @@
       <v-col cols="3">
         <v-divider color="#B2DFE1"></v-divider>
         <v-card-subtitle>
-          <h3>Peso: kg</h3>
+          <h3>Peso: {{info.peso}} kg</h3>
         </v-card-subtitle>
         <v-divider color="#B2DFE1"></v-divider>
         <v-card-subtitle>
-          <h3>Altura: cm</h3>
+          <h3>Altura: {{info.alturauser}} cm</h3>
         </v-card-subtitle>
         <v-divider color="#B2DFE1"></v-divider>
         <v-card-subtitle class="editcont">
@@ -139,10 +139,11 @@ export default {
             nomeuser: doc.data().Nome,
             genero: doc.data().Genero,
             email: email,
-          })
-        }
-
-      
+            peso: doc.data().Peso,
+            alturauser: doc.data().altura,
+            idade: doc.data().Data_nasc,
+          });
+        }       
       },
     }
   };

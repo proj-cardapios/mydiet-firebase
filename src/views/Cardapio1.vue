@@ -3,7 +3,7 @@
     <v-row>
       <v-col cols="1"></v-col>
       <v-col cols="6">
-        <v-card shaped>
+        <v-card shaped v-for="info in infosCardapios" :key="info.id">
           <div>
             <v-card color="#4DC3C8">
               <div>
@@ -13,7 +13,7 @@
               </div>
             </v-card>
             <v-card-subtitle>
-              <h4>morte a dieta</h4>
+              <h4>{{info.Titulocard}}</h4>
             </v-card-subtitle>
             <v-divider color="#4DC3C8"></v-divider>
             <v-card-subtitle>
@@ -22,13 +22,7 @@
                 <v-divider color="#4DC3C8"></v-divider>
 <v-card-subtitle>
               <p>
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-              eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut
-              enim ad minim veniam, quis nostrud exercitation ullamco laboris
-              nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in
-              reprehenderit in voluptate velit esse cillum dolore eu fugiat
-              nulla pariatur. Excepteur sint occaecat cupidatat non proident,
-              sunt in culpa qui officia deserunt mollit anim id est laborum.  
+                {{info.ComentarioCard}}
               </p>
             </v-card-subtitle>
           </div>
@@ -70,12 +64,12 @@
                     counter
                     maxlength="20"
                   ></v-text-field>
-                  <v-text-field label="Hora da refeição: XX:XX"></v-text-field>
+                  <v-text-field label="Hora da refeição: XX:XX" v-model="CampoHoraRef"></v-text-field>
                 </v-col>
               </v-row>
               <v-row>
-                <v-col cols="12" sm="4">
-                  <v-btn color="#4DC3C8" @click.stop="FuncAddRefeicao">
+                <v-col cols="12" sm="4" v-for="info in infosCardapios" :key="info.id">
+                  <v-btn color="#4DC3C8" @click="FuncAddRefeicao(info.IdCardapio)">
                     <v-icon>mdi-plus</v-icon> Criar refeição
                   </v-btn>
                 </v-col>
@@ -95,9 +89,15 @@
     <v-row>
       <v-col cols="1"></v-col>
       <v-col cols="10">
+        <v-alert
+              transition="scale-transition"
+              v-model="alertInvalidInfo"
+              dismissible
+              outlined
+            >O campo "Nome do Cardapio" é obrigatório</v-alert>
         <div>
           <v-expansion-panels>
-            <v-expansion-panel v-for="refeicao in Refeicoes" :key="refeicao">
+            <v-expansion-panel v-for="refeicao in Refeicoes" :key="refeicao.id">
               <v-expansion-panel-header>
                 <v-row>
                   <v-col cols="3">
@@ -105,41 +105,7 @@
                   </v-col>
                   <v-col cols="4">
                     <v-card-subtitle>
-                      <h4>{{ refeicao.titulo }}</h4>
-                    </v-card-subtitle>
-                  </v-col>
-                  <v-col cols="1">
-                    <v-btn
-                      color="#4DC3C8"
-                      max-width="100px"
-                      @click="formAlimentos = true"
-                    >
-                      <v-icon>mdi-pencil</v-icon>editar
-                    </v-btn>
-                  </v-col>
-                  <v-col cols="1"></v-col>
-                  <v-col cols="1">
-                    <v-btn color="#B2DFE1" max-width="140px">
-                      <v-icon>mdi-delete </v-icon>Excluir
-                    </v-btn>
-                  </v-col>
-                </v-row>
-              </v-expansion-panel-header>
-              <v-expansion-panel-content>
-                Para adicionar clique na opção "editar"
-              </v-expansion-panel-content>
-            </v-expansion-panel>
-          </v-expansion-panels>
-          <v-expansion-panels>
-            <v-expansion-panel>
-              <v-expansion-panel-header>
-                <v-row>
-                  <v-col cols="3">
-                    <v-checkbox> </v-checkbox>
-                  </v-col>
-                  <v-col cols="4">
-                    <v-card-subtitle>
-                      <h4>comidinha de cria</h4>
+                      <h4>{{refeicao}}</h4>
                     </v-card-subtitle>
                   </v-col>
                   <v-col cols="1">
@@ -236,6 +202,8 @@
 </template>
 
 <script>
+import * as fb from '@/plugins/firebase';
+import { getAuth} from "firebase/auth";
 import Alimento from "../components/Alimento.vue";
 export default {
   props: ["titulo"],
@@ -250,11 +218,14 @@ export default {
       formRefs: false,
       formAlimentos: false,
       dialog: false,
+      alertInvalidInfo: false,
+      invalidInfo:false,
+      CampoHoraRef:"",
+      infosCardapios:[{
+      }],
       Refeicoes: [
         {
-          titulo: "frango e batata doce",
-          id: 1,
-        },
+        }
       ],
       Alimentos: [
         {
@@ -309,21 +280,41 @@ export default {
       ],
     };
   },
+  mounted(){
+
+this.puxarcardapio();
+this.puxarrefeicoes(this.infosCardapios.IdCadapio);
+},
   methods: {
+    async puxarcardapio(){
+        this.infosCardapios = [],
+        this.uid = fb.auth.currentUser.uid;
+        const CardsUser = await fb.CardapioCollection.where("DonoCardapio","==",this.uid).where("Estaativo","==", true).get();
+        for(const doc of CardsUser.docs){
+          this.infosCardapios.push({
+            Titulocard: doc.data().NomeCardapio,
+            ComentarioCard: doc.data().ComentarioCardapio,
+            IdCardapio: doc.data().idCardapio,
+          })
+        }
+      },
+      async puxarrefeicoes(){
+        this.Refeicoes = [],
+        this.uid = fb.auth.currentUser.uid;
+        const RefsUser = await fb.RefeicaoCollection.where("NomeRefeicao","==",this.uid).get();
+        for(const doc of RefsUser.docs){
+          this.Refeicoes.push({
+            TituloRef: doc.data().NomeRefeicao,
+            HoraRef: doc.data().HorarioRefeicao,
+          })
+        }
+      },
+      
     async Entrarhome() {
       this.$router.push({ name: "Home" });
     },
     async Editarrefs() {
       this.$router.push({ name: "Refeicoes" });
-    },
-    FuncAddRefeicao() {
-      this.Nrefs = this.Nrefs + 1;
-      if (this.Campotitulo) {
-        this.Refeicoes.push({
-          titulo: this.Campotitulo,
-        });
-      }
-      this.Campotitulo = "";
     },
     Maxrefs() {
       if ((this.Nerefs = 5)) {
@@ -331,6 +322,32 @@ export default {
           Alertaerro: true,
         };
       }
+    },
+    async FuncAddRefeicao(IdCardapio) {
+        if(this.Campotitulo == null || this.Campotitulo == ''){
+          this.invalidInfo = false
+        this.alertInvalidInfo = true
+        }
+        else{
+        this.invalidInfo = true
+      }
+      if(this.invalidInfo == true){
+      this.uid = fb.auth.currentUser.uid;
+      const res = await fb.RefeicaoCollection.add({            
+        DonoRefeicao: this.uid,
+        NomeRefeicao: this.Campotitulo,
+        HorarioRefeicao: this.CampoHoraRef,
+        idCardrefeicao: IdCardapio,
+    });
+    const idRefeicao = res.id
+    await fb.RefeicaoCollection.doc(idRefeicao).update({
+      idRefeicao: idRefeicao
+    })
+      }
+ 
+    this.Campotitulo = "";
+    this.CampoHoraRef = "";
+    this.formRefs = false;
     },
   },
 };

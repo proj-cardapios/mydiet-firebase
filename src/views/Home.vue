@@ -41,8 +41,12 @@
             <v-card-title>
               <h2>Cardápios</h2>
             </v-card-title>
-            <v-card-text>
-              <Btncard :titulo="id" v-for="id in Cardapios" :key="id"></Btncard>
+            <v-card-text v-for="info in infosCardapios" :key="info.id">
+              <div class="btncard">
+    <v-btn color="#4DC3C8" @click="entrarCard(info.idCardapio)" v-model="info.id"><v-icon>mdi-food-apple</v-icon>{{info.Titulocard}}</v-btn>
+    
+  </div>
+              
             </v-card-text>
             <v-card-text>
               <v-btn color="#4DC3C8" @click.stop="formcard = !formcard">
@@ -67,9 +71,9 @@
               <v-container>
                 <v-row>
                   <v-col>
-                    <v-text-field v-model="Campotitulo" :rules="[rules.required, rules.counter]"
+                    <v-text-field v-model="Cardapios.Campotitulo" :rules="[rules.required, rules.counter]"
                       label="Nome do cardápio" counter maxlength="20"></v-text-field>
-                    <v-text-field v-model="Comentario" label="Comentário" counter maxlength="80"></v-text-field>
+                    <v-text-field v-model="Cardapios.Comentario" label="Comentário" counter maxlength="80"></v-text-field>
                   </v-col>
                 </v-row>
                 <v-row>
@@ -85,6 +89,12 @@
                     </v-btn>
                   </v-col>
                 </v-row>
+                <v-alert
+              transition="scale-transition"
+              v-model="alertInvalidInfo"
+              dismissible
+              outlined
+            >O campo "Nome do Cardapio" é obrigatório</v-alert>
               </v-container>
             </v-form>
           </v-alert>
@@ -118,7 +128,6 @@
 
 
 <script>
-
 import Btncard from "@/components/btncard.vue";
 import PrfilCard from "../components/PrfilCard.vue";
 import Saibacard from "../components/saibacard.vue";
@@ -134,16 +143,16 @@ export default {
       Campotitulo: "",
       formcard: false,
       saibamais: false,
+      alertInvalidInfo: false,
+      invalidInfo:false,
       infos:[{
       }],
+      infosCardapios:[{}],
       Cardapios: [
         {
-          id: 1,
-          titulo: "morte a dieta",
-        },
-        {
-          id: 2,
-          titulo: "era so uma fritura",
+          Comentario: "",
+          Campotitulo: "",
+          EstaAtivo: Boolean,
         },
       ],
       rules: {
@@ -155,25 +164,21 @@ export default {
     };
   },
 mounted(){
-  this.puxaruser();
+
+  this.puxarcardapios();
 },
   methods: {
-    async puxaruser(){
-      this.infos = [];
-      this.uid = fb.auth.currentUser.uid;
-        const logPerfilUser = await fb.PerfilCollection.where("owner","==",this.uid).get();
-        const auth = getAuth();
-        const user = auth.currentUser;
-        const email = user.email;
-        for (const doc of logPerfilUser.docs) {
-          this.infos.push({
-            nomeempresa: doc.data().nomeEmpresa,
-            cnpj: doc.data().CNPJ,
-            email: email,
+      async puxarcardapios(){
+        this.infosCardapios = [],
+        this.uid = fb.auth.currentUser.uid;
+        const CardsUser = await fb.CardapioCollection.where("DonoCardapio","==",this.uid).get();
+        for(const doc of CardsUser.docs){
+          this.infosCardapios.push({
+            Titulocard: doc.data().NomeCardapio,
+            idCardapio: doc.data().idCardapio,
+            CardAtivo: doc.data().Estaativo,
           })
         }
-
-      
       },
     
     Editarperfil() {
@@ -182,19 +187,40 @@ mounted(){
     Desconectar() {
       this.$router.push({ name: "Login" });
     },
-    entrarCard() {
+    async entrarCard(idCardapio) {
+      const Estaativo = (this.infosCardapios.CardAtivo = true);
+      await fb.CardapioCollection.doc(idCardapio).update({
+        Estaativo: Estaativo
+      })
       this.$router.push({ name: "Cardapio" });
     },
-    FuncAddCardapio() {
-      if (this.Campotitulo) {
-        this.Cardapios.push({
-          titulo: this.Campotitulo,
-        });
+    async FuncAddCardapio() {
+      this.Cardapios.EstaAtivo = false;
+        if(this.Cardapios.Campotitulo == null || this.Cardapios.Campotitulo == ''){
+          this.invalidInfo = false
+        this.alertInvalidInfo = true
+        }
+        else{
+        this.invalidInfo = true
       }
-      this.Campotitulo = "";
-      this.Comentario = "";
+      if(this.invalidInfo == true){
+      this.uid = fb.auth.currentUser.uid;
+      const res = await fb.CardapioCollection.add({            
+        DonoCardapio: this.uid,
+        NomeCardapio: this.Cardapios.Campotitulo,
+        ComentarioCardapio: this.Cardapios.Comentario,
+        Estaativo: this.Cardapios.EstaAtivo,
+    });
+    const idCardapio = res.id
+    await fb.CardapioCollection.doc(idCardapio).update({
+      idCardapio: idCardapio
+    })
+      }
+    this.puxarcardapios();
+    this.Cardapios.Campotitulo = "";
+    this.Cardapios.Comentario = "";
+    this.formcard = false;
     },
-    
   },
   components: { Btncard, PrfilCard, Saibacard },
 };
