@@ -164,7 +164,6 @@ export default {
     };
   },
 mounted(){
-
   this.puxarcardapios();
 },
   methods: {
@@ -178,9 +177,12 @@ mounted(){
             idCardapio: doc.data().idCardapio,
             CardAtivo: doc.data().Estaativo,
           })
-        }
+        };
+        const Estaativo = (this.infosCardapios.CardAtivo = false);
+        await fb.CardapioCollection.doc(CardsUser).update({
+          Estaativo :  Estaativo
+        })
       },
-    
     Editarperfil() {
       this.$router.push({ name: "Cadastro" });
     },

@@ -20,7 +20,7 @@
                   <h3>Comentários</h3>
                 </v-card-subtitle>
                 <v-divider color="#4DC3C8"></v-divider>
-<v-card-subtitle>
+            <v-card-subtitle>
               <p>
                 {{info.ComentarioCard}}
               </p>
