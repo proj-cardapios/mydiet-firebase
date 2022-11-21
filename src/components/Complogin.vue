@@ -106,6 +106,7 @@ export default {
           this.user.email,
           this.user.password,
         );
+        
         this.$router.push({ name: "Home" });
       }
       catch (error) {

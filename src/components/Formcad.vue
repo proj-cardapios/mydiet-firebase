@@ -154,8 +154,7 @@ export default {
         Lactose: this.user.lactose,
         Frutos: this.user.frutos
         });
-      }
-    },
+      },    },
   }
 </script>
 

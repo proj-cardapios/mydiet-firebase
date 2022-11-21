@@ -38,8 +38,10 @@
           </v-btn>
         </v-card-text>
         <v-card-subtitle>
+          <div v-for="info in infosCardapios" :key="info.id">
           <h4>Numero de refeições:</h4>
-          <h4>{{ Nrefs }}/5</h4>
+          <h4>{{ info.Numrefs }}/5</h4>
+        </div>
         </v-card-subtitle>
       </v-col>
     </v-row>
@@ -69,7 +71,7 @@
               </v-row>
               <v-row>
                 <v-col cols="12" sm="4" v-for="info in infosCardapios" :key="info.id">
-                  <v-btn color="#4DC3C8" @click="FuncAddRefeicao(info.IdCardapio)">
+                  <v-btn color="#4DC3C8" @click="FuncAddRefeicao(info.IdCardapio,info.Numrefs)">
                     <v-icon>mdi-plus</v-icon> Criar refeição
                   </v-btn>
                 </v-col>
@@ -83,10 +85,20 @@
             </v-container>
           </v-form>
         </v-alert>
+        <v-alert
+          class="formcardapio"
+          transition="scale-transition"
+          v-show="AvisoMaxRefs"
+          elevation="6"
+          outlined
+          shaped
+        >
+        <h1>Ja atingido numero maximo de refeições</h1>
+        </v-alert>
       </v-col>
       <v-col cols="1"></v-col>
     </v-row>
-    <v-row>
+    <v-row >
       <v-col cols="1"></v-col>
       <v-col cols="10">
         <v-alert
@@ -95,18 +107,22 @@
               dismissible
               outlined
             >O campo "Nome do Cardapio" é obrigatório</v-alert>
-        <div>
+        <div v-for="info in infosCardapios" :key="info.id">
           <v-expansion-panels>
             <v-expansion-panel v-for="refeicao in Refeicoes" :key="refeicao.id">
+              <div v-if="refeicao.idCardrefeicao == info.idCardapio"></div>
               <v-expansion-panel-header>
                 <v-row>
                   <v-col cols="3">
                     <v-checkbox> </v-checkbox>
                   </v-col>
                   <v-col cols="4">
-                    <v-card-subtitle>
-                      <h4>{{refeicao}}</h4>
+                    <div  >
+                    <v-card-subtitle >
+                      
+                      <h4>{{refeicao.TituloRef}}</h4>
                     </v-card-subtitle>
+                  </div>
                   </v-col>
                   <v-col cols="1">
                     <v-btn
@@ -119,7 +135,7 @@
                   </v-col>
                   <v-col cols="1"></v-col>
                   <v-col cols="1">
-                    <v-btn color="#B2DFE1" max-width="140px">
+                    <v-btn color="#B2DFE1" max-width="140px" @click="excluirRefeicao(refeicao.idRefeicao)">
                       <v-icon>mdi-delete </v-icon>Excluir
                     </v-btn>
                   </v-col>
@@ -204,7 +220,9 @@
 <script>
 import * as fb from '@/plugins/firebase';
 import { getAuth} from "firebase/auth";
+import { doc, deleteDoc } from "firebase/firestore";
 import Alimento from "../components/Alimento.vue";
+//import { collection, query, where, getDocs } from "firebase/firestore";
 export default {
   props: ["titulo"],
   components: {
@@ -221,6 +239,8 @@ export default {
       alertInvalidInfo: false,
       invalidInfo:false,
       CampoHoraRef:"",
+      IdRefeicaolog:"",
+      AvisoMaxRefs: false,
       infosCardapios:[{
       }],
       Refeicoes: [
@@ -229,49 +249,42 @@ export default {
       ],
       Alimentos: [
         {
-          id: 1,
           titulo: "feijão",
           peso: 50,
           calorias: 90,
           porcao: 0,
         },
         {
-          id: 2,
           titulo: "arroz",
           peso: 50,
           calorias: 70,
           porcao: 0,
         },
         {
-          id: 3,
           titulo: "Alface",
           peso: 40,
           calorias: 50,
           porcao: 0,
         },
         {
-          id: 4,
           titulo: "batata cozida",
           peso: 50,
           calorias: 80,
           porcao: 0,
         },
         {
-          id: 5,
           titulo: "Beterraba",
           peso: 50,
           calorias: 80,
           porcao: 0,
         },
         {
-          id: 6,
           titulo: "cenoura cozida",
           peso: 50,
           calorias: 80,
           porcao: 0,
         },
         {
-          id: 7,
           titulo: "aipim cozido",
           peso: 50,
           calorias: 80,
@@ -283,7 +296,7 @@ export default {
   mounted(){
 
 this.puxarcardapio();
-this.puxarrefeicoes(this.infosCardapios.IdCadapio);
+this.puxarrefeicoes();
 },
   methods: {
     async puxarcardapio(){
@@ -295,43 +308,23 @@ this.puxarrefeicoes(this.infosCardapios.IdCadapio);
             Titulocard: doc.data().NomeCardapio,
             ComentarioCard: doc.data().ComentarioCardapio,
             IdCardapio: doc.data().idCardapio,
+            EstaAtivo: doc.data().Estaativo,
+            Numrefs: doc.data().NumeroRefs
           })
         }
       },
-      async puxarrefeicoes(){
-        this.Refeicoes = [],
-        this.uid = fb.auth.currentUser.uid;
-        const RefsUser = await fb.RefeicaoCollection.where("NomeRefeicao","==",this.uid).get();
-        for(const doc of RefsUser.docs){
-          this.Refeicoes.push({
-            TituloRef: doc.data().NomeRefeicao,
-            HoraRef: doc.data().HorarioRefeicao,
-          })
-        }
-      },
-      
-    async Entrarhome() {
-      this.$router.push({ name: "Home" });
-    },
-    async Editarrefs() {
-      this.$router.push({ name: "Refeicoes" });
-    },
-    Maxrefs() {
-      if ((this.Nerefs = 5)) {
-        return {
-          Alertaerro: true,
-        };
-      }
-    },
-    async FuncAddRefeicao(IdCardapio) {
-        if(this.Campotitulo == null || this.Campotitulo == ''){
+      async FuncAddRefeicao(IdCardapio, NumRefs) {
+        if(this.Campotitulo == null || this.Campotitulo == ''|| NumRefs < 5){
           this.invalidInfo = false
         this.alertInvalidInfo = true
         }
         else{
         this.invalidInfo = true
       }
-      if(this.invalidInfo == true){
+      if(this.invalidInfo == true ){
+        await fb.CardapioCollection.doc(IdCardapio).update({
+      NumeroRefs: NumRefs + 1
+    });
       this.uid = fb.auth.currentUser.uid;
       const res = await fb.RefeicaoCollection.add({            
         DonoRefeicao: this.uid,
@@ -342,13 +335,50 @@ this.puxarrefeicoes(this.infosCardapios.IdCadapio);
     const idRefeicao = res.id
     await fb.RefeicaoCollection.doc(idRefeicao).update({
       idRefeicao: idRefeicao
-    })
+    }); 
+    this.IdRefeicaolog = idRefeicao;
+    
       }
- 
+    this.puxarcardapio();
+    this.puxarrefeicoes();
     this.Campotitulo = "";
     this.CampoHoraRef = "";
     this.formRefs = false;
     },
+      async puxarrefeicoes(){
+        this.Refeicoes = [];
+        this.uid = fb.auth.currentUser.uid;
+        const RefsUser = await fb.RefeicaoCollection.where("DonoRefeicao","==",this.uid).get();
+        for(const doc of RefsUser.docs){
+          this.Refeicoes.push({
+            TituloRef: doc.data().NomeRefeicao,
+            HoraRef: doc.data().HorarioRefeicao,
+            idCardrefeicao: doc.data().idCardrefeicao,
+            idRefeicao: doc.data().idRefeicao
+          })
+        }
+      },
+      
+    async Entrarhome() {
+      this.$router.push({ name: "Home" });
+    },
+    async Editarrefs() {
+      this.$router.push({ name: "Refeicoes" });
+    },
+    async NumeroRefs(){
+
+    },
+    Maxrefs() {
+      if ((this.Nerefs = 5)) {
+        return {
+          Alertaerro: true,
+        };
+      }
+    },
+    async excluirRefeicao(idRefeicao) {
+      await deleteDoc(doc(fb.RefeicaoCollection, idRefeicao));
+      this.puxarrefeicoes();
+    }
   },
 };
 </script>
