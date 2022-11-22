@@ -143,7 +143,7 @@ export default {
 },
     async registrarPerfil(){
       this.uid = fb.auth.currentUser.uid;
-      await fb.PerfilCollection.add({            
+      const res = await fb.PerfilCollection.add({            
         owner: this.uid,
         Nome: this.user.nome,
         Genero: this.user.genero,
@@ -154,6 +154,10 @@ export default {
         Lactose: this.user.lactose,
         Frutos: this.user.frutos
         });
+        const idPerfil = res.id
+        await fb.PerfilCollection.doc(idPerfil).update({
+          idPerfil: idPerfil
+        })
       },    },
   }
 </script>

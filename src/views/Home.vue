@@ -175,6 +175,7 @@ export default {
           .update({
             Estaativo: false
           })
+          
       })
     },
     async puxarcardapios() {

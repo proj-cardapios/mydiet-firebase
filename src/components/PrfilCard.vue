@@ -30,13 +30,13 @@
         </v-card-subtitle>
         <v-divider color="#B2DFE1"></v-divider>
         <v-card-subtitle>
-          <h3>Altura: {{info.alturauser}} cm</h3>
+          <h3>Altura: {{info.altura}} cm</h3>
         </v-card-subtitle>
         <v-divider color="#B2DFE1"></v-divider>
         <v-card-subtitle class="editcont">
         <v-dialog v-model="dialog" width="500">
           <template v-slot:activator="{ on, attrs }">
-            <v-btn color="#4DC3C8" v-bind="attrs" v-on="on">Editar Conta</v-btn> 
+            <v-btn color="#4DC3C8" v-bind="attrs" v-on="on">Editar Perfil</v-btn> 
           </template>
 
           <v-card>
@@ -62,40 +62,33 @@
     </v-form>
     <h3>informações necessárias</h3>
     <v-form class="form">
-      <v-text-field label="Ano de Nascimento (Ex = 2004)" type="date" outlined v-model="user.idade"></v-text-field>
+      <v-text-field label="Ano de Nascimento (Ex = 2004)" type="date" outlined v-model="info.idade"></v-text-field>
       <v-text-field label="Gênero" outlined v-model="info.genero"></v-text-field>
-      <v-text-field label="Peso" outlined v-model="user.peso"></v-text-field>
-      <v-text-field label="Altura" outlined v-model="user.altura"></v-text-field>
+      <v-text-field label="Peso" outlined v-model="info.peso"></v-text-field>
+      <v-text-field label="Altura" outlined v-model="info.altura"></v-text-field>
     </v-form>
     <h3>Alergias</h3>
     <v-checkbox
-      v-model="user.gluten"
+      v-model="info.gluten"
       :label="`Gluten`"
     ></v-checkbox>
     <v-checkbox
-      v-model="user.lactose"
+      v-model="info.lactose"
       :label="`Lactose`"
     ></v-checkbox>
     <v-checkbox
-      v-model="user.frutos"
+      v-model="info.frutos"
       :label="`Frutos do Mar`"
     ></v-checkbox>
-    </div>
+        <v-btn color="#4DC3C8" @click="EditarPerfil(info)">Salvar Perfil</v-btn>
+
+  
+  </div>
     <v-row class="botoes">
       <v-col >
-        <v-btn color="#4DC3C8" >Cadastrar-se</v-btn>
-      </v-col>
-
-      <v-col >
-        <v-btn color="#B2DFE1" >Cancelar</v-btn>
+        <v-btn color="#B2DFE1" @click.stop="dialog= !dialog" >Cancelar</v-btn>
       </v-col>
     </v-row>
-    <v-alert
-              transition="scale-transition"
-              v-model="userExiste"
-              dismissible
-              outlined
-            >Este email já está em uso.</v-alert>
             <v-alert
               transition="scale-transition"
               v-model="alertInvalidInfo"
@@ -157,6 +150,7 @@
 import imcresultado from "./IMC_resultado.vue";
 import * as fb from '@/plugins/firebase'
 import { getAuth} from "firebase/auth";
+import { doc } from "@firebase/firestore";
 
 export default {
   components: { imcresultado },
@@ -174,8 +168,8 @@ export default {
       this.puxaruser();
     },
   methods: {
-    Editarperfil() {
-      this.$router.push({ name: "Cadastro" });
+    EditarPerfil() {
+      ;
     },
     Desconectar() {
       this.$router.push({ name: "Login" });
@@ -193,11 +187,31 @@ export default {
             genero: doc.data().Genero,
             email: email,
             peso: doc.data().Peso,
-            alturauser: doc.data().altura,
+            altura: doc.data().altura,
             idade: doc.data().Data_nasc,
+            gluten: doc.data().gluten,
+            lactose: doc.data().Lactose,
+            frutos: doc.data().Frutos,
+            idPerfil: doc.data().idPerfil
           });
         }       
       },
+      async EditarPerfil(info) {
+      const idperfil = info.idPerfil
+     // await fb.PerfilCollection.doc(info.idPerfil).update({
+     const collection = await fb.PerfilCollection.doc(idperfil).update({
+          Nome: info.nomeuser,
+          Genero: info.genero,
+          Data_nasc: info.idade,
+          Peso: info.peso,
+          altura: info.altura,
+          gluten: info.gluten,
+          Lactose: info.lactose,
+          Frutos: info.frutos
+          })
+          
+
+    },
     }
   };
 </script>
@@ -211,5 +225,8 @@ export default {
 }
 .btncalc {
   margin: 1rem 0 0 0;
+}
+.botoes {
+  padding-top: 1rem;
 }
 </style>
