@@ -128,7 +128,7 @@
                     <v-btn
                       color="#4DC3C8"
                       max-width="100px"
-                      @click="formAlimentos = true"
+                      @click="AddAlimento(refeicao.idRefeicao)"
                     >
                       <v-icon>mdi-pencil</v-icon>editar
                     </v-btn>
@@ -176,7 +176,7 @@
         <v-alert
           class="formcardapio"
           transition="scale-transition"
-          v-show="formAlimentos"
+          v-model="formAlimentos"
           elevation="6"
           outlined
           shaped
@@ -186,11 +186,49 @@
               <v-row>
                 <v-col>
 
-                    <Alimento
-                      :idalimento="id"
-                      v-for="id in Alimentos"
-                      :key="id"
-                    />
+                  <div>
+    <v-card v-for="alimento in Alimentos" :key="alimento.id"  shaped>
+    <v-row class="infoalimentos">
+      <v-col cols="3">
+        <v-card-subtitle>
+          <h2 class="alimentocard">{{alimento.titulo}}</h2>
+        </v-card-subtitle>
+        <v-card-subtitle>
+          Peso/Porção: {{alimento.peso}} gramas
+        </v-card-subtitle>
+        <v-card-subtitle>
+          Caloria: {{alimento.calorias}} cal
+        </v-card-subtitle>
+      </v-col>
+      <v-col cols="4">
+        <v-card-subtitle>
+          <h4>Porções:</h4>
+        </v-card-subtitle>
+        <v-card-subtitle>
+          <v-btn color="#B2DFE1" text>
+            <v-icon>mdi-minus</v-icon>
+          </v-btn>
+          <v-btn text>{{alimento.porcao}}</v-btn>
+          <v-btn color="#4DC3C8" text @click="AddAlimentoEspecif(alimento)">
+            <v-icon>mdi-plus</v-icon>
+          </v-btn>
+        </v-card-subtitle>
+      </v-col>
+      <v-col cols="3">
+        <v-card-subtitle>
+          Gorduras:
+        </v-card-subtitle>
+        <v-card-subtitle>
+          Proteínas:
+        </v-card-subtitle>
+        <v-card-subtitle>
+          Carboidratos:
+        </v-card-subtitle>
+      </v-col>
+    </v-row>
+  </v-card>
+  </div>
+            
                   
                 </v-col>
               </v-row>
@@ -239,58 +277,89 @@ export default {
       alertInvalidInfo: false,
       invalidInfo:false,
       CampoHoraRef:"",
-      IdRefeicaolog:"",
       AvisoMaxRefs: false,
+      idAlimentosAll:"",
+      idAlimentolog:"",
       infosCardapios:[{
       }],
       Refeicoes: [
         {
         }
       ],
-      Alimentos: [
+      Alimentos:[
         {
+          id:1,
           titulo: "feijão",
           peso: 50,
           calorias: 90,
           porcao: 0,
+          proteinas:50,
+          carboidratos:339,
+          gorduras:86,
         },
         {
+          id:2,
           titulo: "arroz",
           peso: 50,
           calorias: 70,
           porcao: 0,
+          proteinas:50,
+          carboidratos:339,
+          gorduras:86,
         },
         {
+          id:3,
           titulo: "Alface",
           peso: 40,
           calorias: 50,
           porcao: 0,
+          proteinas:50,
+          carboidratos:339,
+          gorduras:86,
         },
         {
+          id:4,
           titulo: "batata cozida",
           peso: 50,
           calorias: 80,
           porcao: 0,
+          proteinas:50,
+          carboidratos:339,
+          gorduras:86,
         },
         {
+          id:5,
           titulo: "Beterraba",
           peso: 50,
           calorias: 80,
           porcao: 0,
+          proteinas:50,
+          carboidratos:339,
+          gorduras:86,
         },
         {
+          id:6,
           titulo: "cenoura cozida",
           peso: 50,
           calorias: 80,
           porcao: 0,
+          proteinas:50,
+          carboidratos:339,
+          gorduras:86,
         },
         {
+          id:7,
           titulo: "aipim cozido",
           peso: 50,
           calorias: 80,
           porcao: 0,
+          proteinas:50,
+          carboidratos:339,
+          gorduras:86,
         },
       ],
+
+      
     };
   },
   mounted(){
@@ -314,7 +383,7 @@ this.puxarrefeicoes();
         }
       },
       async FuncAddRefeicao(IdCardapio, NumRefs) {
-        if(this.Campotitulo == null || this.Campotitulo == ''|| NumRefs < 5){
+        if(this.Campotitulo == null || this.Campotitulo == ''){
           this.invalidInfo = false
         this.alertInvalidInfo = true
         }
@@ -322,9 +391,7 @@ this.puxarrefeicoes();
         this.invalidInfo = true
       }
       if(this.invalidInfo == true ){
-        await fb.CardapioCollection.doc(IdCardapio).update({
-      NumeroRefs: NumRefs + 1
-    });
+
       this.uid = fb.auth.currentUser.uid;
       const res = await fb.RefeicaoCollection.add({            
         DonoRefeicao: this.uid,
@@ -336,7 +403,7 @@ this.puxarrefeicoes();
     await fb.RefeicaoCollection.doc(idRefeicao).update({
       idRefeicao: idRefeicao
     }); 
-    this.IdRefeicaolog = idRefeicao;
+
     
       }
     this.puxarcardapio();
@@ -358,7 +425,18 @@ this.puxarrefeicoes();
           })
         }
       },
-      
+      async AddAlimento(idRefeicao) {
+      this.uid = fb.auth.currentUser.uid;
+       const res = await fb.AlimentoCollection.add({
+          idRefeicaoALimento : idRefeicao
+        })
+        const idAlimento = res.id
+        await fb.AlimentoCollection.doc(idAlimento).update({
+          idAlimentosAll: idAlimento
+        })
+        this.idAlimentosAll = idAlimento
+        this.formAlimentos = true
+    },
     async Entrarhome() {
       this.$router.push({ name: "Home" });
     },
@@ -378,9 +456,50 @@ this.puxarrefeicoes();
     async excluirRefeicao(idRefeicao) {
       await deleteDoc(doc(fb.RefeicaoCollection, idRefeicao));
       this.puxarrefeicoes();
+    },
+    async AddAlimentoEspecif(alimento) {
+      this.uid = fb.auth.currentUser.uid;
+      if (alimento.porcao == 0 ){
+        const res = await fb.AlimentodeAlimentosCollection.add({
+          alimento: [{
+        NomeAlimento: alimento.titulo,
+        PesoAlimento: alimento.peso,
+        CaloriasAlimento: alimento.calorias,
+        ProeinasAlimento:alimento.proteinas,
+        CarboidratosAlimento:alimento.carboidratos,
+        GorduraAlimento:alimento.gorduras,
+        PorcaoAlimento: (alimento.porcao = 1),
+        Id: alimento.id,
+        AlimentoRefeicaoDono: this.idAlimentosAll         
+        }]
+        })
+        const idAlimento = res.id
+        await fb.AlimentodeAlimentosCollection.doc(idAlimento).update({
+          idAlimento: idAlimento
+        })
+        this.idAlimentolog = idAlimento
+      }
+      if(alimento.porcao > 0) {
+        const idAlimento = this.idAlimentolog;
+        await fb.AlimentodeAlimentosCollection.doc(idAlimento).update({
+          alimento: [{
+        NomeAlimento: alimento.titulo,
+        PesoAlimento: alimento.peso,
+        CaloriasAlimento: alimento.calorias,
+        ProeinasAlimento:alimento.proteinas,
+        CarboidratosAlimento:alimento.carboidratos,
+        GorduraAlimento:alimento.gorduras,
+        PorcaoAlimento: alimento.porcao + 1,
+        Id: alimento.id,
+        AlimentoRefeicaoDono: this.idAlimentosAll         
+        }]
+      }),  
+      alimento.porcao = alimento.porcao + 1
     }
+        
+    },
   },
-};
+}
 </script>
 
 <style>

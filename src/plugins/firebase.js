@@ -23,7 +23,9 @@ const db = firebase.firestore()
 const PerfilCollection = db.collection('Perfil')
 const CardapioCollection = db.collection('Cardapio')
 const RefeicaoCollection = db.collection('Refeicao')
+const AlimentoCollection = db.collection('Alimento')
+const AlimentodeAlimentosCollection = db.collection('AlimentosSeparados')
 
 export {
-auth, db, PerfilCollection, CardapioCollection, RefeicaoCollection
+auth, db, PerfilCollection, CardapioCollection, RefeicaoCollection,AlimentoCollection,AlimentodeAlimentosCollection
 }

@@ -209,7 +209,7 @@ export default {
           Lactose: info.lactose,
           Frutos: info.frutos
           })
-          
+        this.puxaruser();
 
     },
     }
