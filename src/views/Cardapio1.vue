@@ -116,7 +116,6 @@
               </v-expansion-panel-header>
               <v-expansion-panel-content>
                 <v-row v-for="AlimentoRef in AlimentosRefs" :key="AlimentoRef.id">
-                  <div v-if="refeicao.idRefeicao == AlimentoRef.AlimentoRefeicaoDono"></div>
                   <v-col cols="4">
                     <ul>
                       <li>{{ AlimentoRef.NomeAlimento }} ({{ AlimentoRef.PorcaoAlimento }})</li>
@@ -170,7 +169,7 @@
                             <h4>Porções:</h4>
                           </v-card-subtitle>
                           <v-card-subtitle>
-                            <v-btn color="#B2DFE1" text>
+                            <v-btn color="#B2DFE1" text @click="TirarAlimentoEspecif(alimento)">
                               <v-icon>mdi-minus</v-icon>
                             </v-btn>
                             <v-btn text>{{ alimento.porcao }}</v-btn>
@@ -223,7 +222,7 @@
 <script>
 import * as fb from '@/plugins/firebase';
 import { getAuth } from "firebase/auth";
-import { doc, deleteDoc, where } from "firebase/firestore";
+import { doc, deleteDoc, query, collection, where, getDocs } from "firebase/firestore";
 import Alimento from "../components/Alimento.vue";
 //import { collection, query, where, getDocs } from "firebase/firestore";
 export default {
@@ -443,6 +442,7 @@ export default {
             idalimentosAll:doc.data().idAlimentosAll,            
             idaefeicaoALimento: doc.data().idRefeicaoALimento,
         })
+
       }
     },
     async AddAlimentoEspecif(alimento) {
@@ -494,22 +494,35 @@ export default {
           alimento.porcao = alimento.porcao + 1
       }
     },
+    async TirarAlimentoEspecif(alimento) {
+      await fb.AlimentoCollection.doc(this.idAlimentosAll).collection("Alimentoseparado").doc(this.idAlimentolog).set({
+          idAlimento: this.idAlimentolog,
+          DonoAlimento: this.uid,
+            NomeAlimento: alimento.titulo,
+            PesoAlimento: alimento.peso,
+            CaloriasAlimento: alimento.calorias,
+            ProeinasAlimento: alimento.proteinas,
+            CarboidratosAlimento: alimento.carboidratos,
+            GorduraAlimento: alimento.gorduras,
+            PorcaoAlimento: (alimento.porcao - 1),
+            Id: alimento.id,
+            AlimentoRefeicaoDono: this.idRefeicaolog
+        })
+          alimento.porcao = alimento.porcao - 1
+    },
     async puxaralimentosref() {
-      this.AlimentosRefs=[];
-      this.uid = fb.auth.currentUser.uid;
-      const idAlilog = await fb.AlimentoSepraCollection.where("AlimentoRefeicaoDono","==",this.idRefeicaolog).get();
-      for (const doc of idAlilog.docs) {
-        this.AlimentosRefs.push({
-            NomeAlimento: doc.data().NomeAlimento,
-            PesoAlimento:doc.data().PesoAlimento,            
-            CaloriasAlimento: doc.data().CaloriasAlimento,
-            ProeinasAlimento: doc.data().ProeinasAlimento,
-            CarboidratosAlimento: doc.data().CarboidratosAlimento,
-            GorduraAlimento: doc.data().GorduraAlimento,
-            PorcaoAlimento:doc.data().PorcaoAlimento,
-            DonoAlimento:doc.data().DonoAlimento,
-            AlimentoRefeicaoDono:doc.data().AlimentoRefeicaoDono
-        })}
+      const q = query(collection(fb.db, "Alimento/4SgC0q7n9REoNq38sWi8/Alimentoseparado"));
+                const docsSnap = await getDocs(q);
+                docsSnap.forEach((doc) => {
+                  this.AlimentosRefs.push({
+                    NomeAlimento: doc.data().NomeAlimento,
+                    PesoAlimento: doc.data().PesoAlimento,
+                    PorcaoAlimento: doc.data().PorcaoAlimento,
+                    CaloriasAlimento: doc.data().CaloriasAlimento,
+                    ProteinasAlimento:doc.data().ProteinasAlimento,
+                    CarboidratosAlimento:doc.data().CarboidratosAlimento
+                  })
+      });
     }
   },
 }
