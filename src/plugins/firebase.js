@@ -24,8 +24,8 @@ const PerfilCollection = db.collection('Perfil')
 const CardapioCollection = db.collection('Cardapio')
 const RefeicaoCollection = db.collection('Refeicao')
 const AlimentoCollection = db.collection('Alimento')
-const AlimentodeAlimentosCollection = db.collection('AlimentosSeparados')
+const AlimentoSepraCollection = db.collection('AlimentosSeparados')
 
 export {
-auth, db, PerfilCollection, CardapioCollection, RefeicaoCollection,AlimentoCollection,AlimentodeAlimentosCollection
+auth, db, PerfilCollection, CardapioCollection, RefeicaoCollection, AlimentoCollection, AlimentoSepraCollection
 }
