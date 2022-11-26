@@ -116,6 +116,7 @@
               </v-expansion-panel-header>
               <v-expansion-panel-content>
                 <v-row v-for="AlimentoRef in AlimentosRefs" :key="AlimentoRef.id">
+                  <div v-if="AlimentoRef.AlimentoRefeicaoDono == refeicao.idRefeicao">
                   <v-col cols="4">
                     <ul>
                       <li>{{ AlimentoRef.NomeAlimento }} ({{ AlimentoRef.PorcaoAlimento }})</li>
@@ -132,7 +133,7 @@
                     {{ AlimentoRef.CaloriasAlimento }}
                     {{ AlimentoRef.CaloriasAlimento }}
                   </v-col>
-
+                </div>
                 </v-row>
               </v-expansion-panel-content>
             </v-expansion-panel>
@@ -199,7 +200,7 @@
 
               <v-row>
                 <v-col cols="12" sm="4">
-                  <v-btn color="#4DC3C8">
+                  <v-btn color="#4DC3C8" @click="puxaralimentosref()">
                     <v-icon>mdi-plus</v-icon> Adiconar Alimentos
                   </v-btn>
                 </v-col>
@@ -221,10 +222,8 @@
 
 <script>
 import * as fb from '@/plugins/firebase';
-import { getAuth } from "firebase/auth";
-import { doc, deleteDoc, query, collection, where, getDocs } from "firebase/firestore";
+import { doc, deleteDoc, collection, where, getDocs, query} from "firebase/firestore";
 import Alimento from "../components/Alimento.vue";
-//import { collection, query, where, getDocs } from "firebase/firestore";
 export default {
   props: ["titulo"],
   components: {
@@ -395,17 +394,7 @@ export default {
       }
     },
     async AddAlimento(idRefeicao) {
-      this.uid = fb.auth.currentUser.uid;
-      const res = await fb.AlimentoCollection.add({
-        idRefeicaoALimento: idRefeicao,
-        DonoAlimento: this.uid,
-      })
-      const idAlimento = res.id
-      await fb.AlimentoCollection.doc(idAlimento).update({
-        idAlimentosAll: idAlimento
-      })
       this.idRefeicaolog = idRefeicao
-      this.idAlimentosAll = idAlimento
       this.formAlimentos = true
     },
     async Entrarhome() {
@@ -425,7 +414,6 @@ export default {
       }
     },
     async excluirAlimentosall() {
-      await deleteDoc(doc(fb.AlimentoCollection, this.idAlimentosAll));
       this.formAlimentos = false
     },
     async excluirRefeicao(idRefeicao) {
@@ -442,13 +430,13 @@ export default {
             idalimentosAll:doc.data().idAlimentosAll,            
             idaefeicaoALimento: doc.data().idRefeicaoALimento,
         })
-
+        this.idAlimentosAll = doc.data().idAlimentosAll
       }
     },
     async AddAlimentoEspecif(alimento) {
       this.uid = fb.auth.currentUser.uid;
       if (alimento.porcao == 0) {
-        const res = await fb.AlimentoCollection.doc(this.idAlimentosAll).collection("Alimentoseparado").add({
+        const res = await fb.RefeicaoCollection.doc(this.idRefeicaolog).collection("Alimentoseparado").add({
             DonoAlimento: this.uid,
             NomeAlimento: alimento.titulo,
             PesoAlimento: alimento.peso,
@@ -462,7 +450,7 @@ export default {
 
         })
         const idAlimento = res.id
-        await fb.AlimentoCollection.doc(this.idAlimentosAll).collection("Alimentoseparado").doc(idAlimento).set({
+        await fb.RefeicaoCollection.doc(this.idRefeicaolog).collection("Alimentoseparado").doc(idAlimento).set({
           idAlimento: idAlimento,
           DonoAlimento: this.uid,
             NomeAlimento: alimento.titulo,
@@ -478,7 +466,7 @@ export default {
         this.idAlimentolog = idAlimento
       }
       else {
-        await fb.AlimentoCollection.doc(this.idAlimentosAll).collection("Alimentoseparado").doc(this.idAlimentolog).set({
+        await fb.RefeicaoCollection.doc(this.idRefeicaolog).collection("Alimentoseparado").doc(this.idAlimentolog).set({
           idAlimento: this.idAlimentolog,
           DonoAlimento: this.uid,
             NomeAlimento: alimento.titulo,
@@ -491,11 +479,13 @@ export default {
             Id: alimento.id,
             AlimentoRefeicaoDono: this.idRefeicaolog
         })
+
           alimento.porcao = alimento.porcao + 1
+
       }
     },
     async TirarAlimentoEspecif(alimento) {
-      await fb.AlimentoCollection.doc(this.idAlimentosAll).collection("Alimentoseparado").doc(this.idAlimentolog).set({
+      await fb.RefeicaoCollection.doc(this.idRefeicaolog).collection("Alimentoseparado").doc(this.idAlimentolog).set({
           idAlimento: this.idAlimentolog,
           DonoAlimento: this.uid,
             NomeAlimento: alimento.titulo,
@@ -508,23 +498,22 @@ export default {
             Id: alimento.id,
             AlimentoRefeicaoDono: this.idRefeicaolog
         })
+
           alimento.porcao = alimento.porcao - 1
     },
-    async puxaralimentosref() {
-      const q = query(collection(fb.db, "Alimento/4SgC0q7n9REoNq38sWi8/Alimentoseparado"));
-                const docsSnap = await getDocs(q);
-                docsSnap.forEach((doc) => {
-                  this.AlimentosRefs.push({
-                    NomeAlimento: doc.data().NomeAlimento,
-                    PesoAlimento: doc.data().PesoAlimento,
-                    PorcaoAlimento: doc.data().PorcaoAlimento,
-                    CaloriasAlimento: doc.data().CaloriasAlimento,
-                    ProteinasAlimento:doc.data().ProteinasAlimento,
-                    CarboidratosAlimento:doc.data().CarboidratosAlimento
-                  })
-      });
-    }
-  },
+    async puxaralimentosref (){
+      this.AlimentosRefs = [],
+      fb.RefeicaoCollection.doc(this.idRefeicaolog).collection("Alimentoseparado").get().then((querySnapshot) => {
+        querySnapshot.forEach((doc)=>{
+          console.log(`${doc.id} => ${doc.data().NomeAlimento},${doc.data().AlimentoRefeicaoDono}`);
+          this.AlimentosRefs.push({
+            NomeAlimento: doc.data().NomeAlimento,
+            AlimentoRefeicaoDono: doc.data().AlimentoRefeicaoDono,
+          })
+        })
+      })
+    },
+}
 }
 </script>
 
