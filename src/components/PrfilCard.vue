@@ -18,10 +18,6 @@
           <h3>Idade: {{(new Date().getFullYear() - info.idade.split("-")[0])}} anos</h3>
         </v-card-subtitle>
         <v-divider color="#B2DFE1"></v-divider>
-        <v-card-subtitle>
-          <h3>Gênero: {{info.genero}} </h3>
-        </v-card-subtitle>
-        <v-divider color="#B2DFE1"></v-divider>
       </v-col>
       <v-col >
         <v-divider color="#B2DFE1"></v-divider>
@@ -53,33 +49,14 @@
 
     <v-form   >
       <v-text-field label="Nome" outlined v-model="info.nomeuser">{{info.nomeuser}}</v-text-field>
-      <v-text-field label="Email" outlined v-model="info.email"></v-text-field>
-      <v-text-field label="Senh a" outlined :type="show ? 'text' : 'password'"
-              :append-icon="show ? 'mdi-eye' : 'mdi-eye-off'"
-              @click:append="show = !show"
-              v-model="user.password"></v-text-field>
+
       
     </v-form>
-    <h3>informações necessárias</h3>
     <v-form class="form">
       <v-text-field label="Ano de Nascimento (Ex = 2004)" type="date" outlined v-model="info.idade"></v-text-field>
-      <v-text-field label="Gênero" outlined v-model="info.genero"></v-text-field>
       <v-text-field label="Peso" outlined v-model="info.peso"></v-text-field>
       <v-text-field label="Altura" outlined v-model="info.altura"></v-text-field>
     </v-form>
-    <h3>Alergias</h3>
-    <v-checkbox
-      v-model="info.gluten"
-      :label="`Gluten`"
-    ></v-checkbox>
-    <v-checkbox
-      v-model="info.lactose"
-      :label="`Lactose`"
-    ></v-checkbox>
-    <v-checkbox
-      v-model="info.frutos"
-      :label="`Frutos do Mar`"
-    ></v-checkbox>
         <v-btn color="#4DC3C8" @click="EditarPerfil(info)">Salvar Perfil</v-btn>
 
   
@@ -124,20 +101,15 @@
             </v-card-subtitle>
             <p>
                 Com base nos dados do Usuario, o sistema calcula de forma
-                automatica o deu indice de massa corporal
+                automatica o índice de massa corporal.
               </p>
+              
             <v-divider color="#B2DFE1"></v-divider>
             <v-row class="IMCcalc">
-              <v-col cols="3">
-                <v-btn color="#4DC3C8" class="btncalc">Calcular</v-btn>
-                
-              </v-col>
-              <v-col cols="9">
 
-                <v-card-subtitle>
+
                   <imcresultado></imcresultado>
-                </v-card-subtitle>
-              </v-col>
+
             </v-row>
           </v-col>
         </v-row>
@@ -156,12 +128,13 @@ export default {
   components: { imcresultado },
   data() {
     return {
+
       dialog: false,
       infos:[],
       show: false,
       alertInvalidInfo: false,
       invalidInfo:false,
-      user:{email:'', password:'',nome:'',genero:'',idade:'' ,peso:'',altura:'',gluten:Boolean,lactose:Boolean,frutos:Boolean}
+      user:{email:'', password:'',nome:'',idade:'' ,peso:'',altura:'',gluten:Boolean,lactose:Boolean,frutos:Boolean}
     };
   },
   mounted(){
@@ -184,14 +157,10 @@ export default {
         for (const doc of logPerfilUser.docs) {
           this.infos.push({
             nomeuser: doc.data().Nome,
-            genero: doc.data().Genero,
             email: email,
             peso: doc.data().Peso,
             altura: doc.data().altura,
             idade: doc.data().Data_nasc,
-            gluten: doc.data().gluten,
-            lactose: doc.data().Lactose,
-            frutos: doc.data().Frutos,
             idPerfil: doc.data().idPerfil
           });
         }       
@@ -201,13 +170,9 @@ export default {
      // await fb.PerfilCollection.doc(info.idPerfil).update({
      const collection = await fb.PerfilCollection.doc(idperfil).update({
           Nome: info.nomeuser,
-          Genero: info.genero,
           Data_nasc: info.idade,
           Peso: info.peso,
           altura: info.altura,
-          gluten: info.gluten,
-          Lactose: info.lactose,
-          Frutos: info.frutos
           })
         this.puxaruser();
 
@@ -221,10 +186,10 @@ export default {
   margin: 1px 0 0 0;
 }
 .IMCcalc {
-  margin: 1px 0 0 0;
+  margin: 3px 0 0 0;
 }
 .btncalc {
-  margin: 1rem 0 0 0;
+  margin: 6px 0 0 0;
 }
 .botoes {
   padding-top: 1rem;

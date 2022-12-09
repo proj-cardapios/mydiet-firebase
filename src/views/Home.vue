@@ -8,7 +8,7 @@
             <v-card-title aling-self="center">
               <h2>Quer saber mais sobre o projeto?</h2>
             </v-card-title>
-            <v-card-title>
+            <v-card-title class="btnsaibamais">
               <v-btn color="#4DC3C8" @click.stop="saibamais = !saibamais">Clique aqui</v-btn>
             </v-card-title>
           </v-card>
@@ -240,6 +240,7 @@ export default {
 </script>
 
 <style scoped>
+
 .cardapios {
   margin-top: 2rem;
 }

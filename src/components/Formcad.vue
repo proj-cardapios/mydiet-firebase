@@ -17,7 +17,6 @@
     <h3>informações necessárias</h3>
     <v-form class="form">
       <v-text-field label="Ano de Nascimento (Ex = 2004)" type="date" outlined v-model="user.idade"></v-text-field>
-      <v-text-field label="Gênero" outlined v-model="user.genero"></v-text-field>
       <v-text-field label="Peso" outlined v-model="user.peso"></v-text-field>
       <v-text-field label="Altura" outlined v-model="user.altura"></v-text-field>
     </v-form>
@@ -58,14 +57,12 @@ import { signInWithEmailAndPassword } from "firebase/auth";
 export default {
     data () {
       return {
-        Gluten: false,
-        Lactose: false,
-        Frutos: false,
+
         show: false,
         alertInvalidInfo: false,
         invalidInfo:false,
         userExiste: false,
-        user:{email:'', password:'',nome:'',genero:'',idade:'' ,peso:'',altura:'',gluten:Boolean,lactose:Boolean,frutos:Boolean}
+        user:{email:'', password:'',nome:'',idade:'' ,peso:'',altura:'',gluten:Boolean,lactose:Boolean,frutos:Boolean}
       }
       
     },
@@ -81,7 +78,7 @@ export default {
     },
     async criarNovaConta() {
     try{
-      if(this.user.nome == null || this.user.nome == ''||this.user.idade == null || this.user.idade == '' || this.user.email == null || this.user.email == '' || this.user.genero == null || this.user.genero == '' || this.user.peso == null || this.user.peso == '' || this.user.altura == null || this.user.altura == '' || this.user.password == null || this.user.password == ''){
+      if(this.user.nome == null || this.user.nome == ''||this.user.idade == null || this.user.idade == '' || this.user.email == null || this.user.email == '' || this.user.peso == null || this.user.peso == '' || this.user.altura == null || this.user.altura == '' || this.user.password == null || this.user.password == ''){
         this.invalidInfo = false
         this.alertInvalidInfo = true
       }
@@ -133,13 +130,10 @@ export default {
       const res = await fb.PerfilCollection.add({            
         owner: this.uid,
         Nome: this.user.nome,
-        Genero: this.user.genero,
+        Email: this.user.email,
         Data_nasc: this.user.idade,
         Peso: this.user.peso,
         altura: this.user.altura,
-        gluten: this.user.gluten,
-        Lactose: this.user.lactose,
-        Frutos: this.user.frutos
         });
         const idPerfil = res.id
         await fb.PerfilCollection.doc(idPerfil).update({

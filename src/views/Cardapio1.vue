@@ -40,7 +40,7 @@
         <v-card-subtitle>
           <div v-for="info in infosCardapios" :key="info.id">
             <h4>Numero de refeições:</h4>
-            <h4>{{ info.Numrefs }}/5</h4>
+            <h4> {{Nrefs}}/5</h4>
           </div>
         </v-card-subtitle>
       </v-col>
@@ -53,8 +53,7 @@
             <v-container>
               <v-row>
                 <v-col>
-                  <v-text-field v-model="Campotitulo" label="Nome da refeiçãoooo" counter maxlength="20"></v-text-field>
-                  <v-text-field label="Hora da refeição: XX:XX" v-model="CampoHoraRef"></v-text-field>
+                  <v-text-field v-model="Campotitulo" label="Nome da Refeição" counter maxlength="20"></v-text-field>
                 </v-col>
               </v-row>
               <v-row>
@@ -86,11 +85,11 @@
           Cardapio" é obrigatório</v-alert>
         <div>
           <v-expansion-panels>
-            <v-expansion-panel v-for="refeicao in Refeicoes" :key="refeicao.id">
+            <v-expansion-panel v-for="refeicao in Refeicoes" :key="refeicao.id" @click="puxaralimentosref(refeicao.idRefeicao)">
               <v-expansion-panel-header>
                 <v-row v-for="info in infosCardapios" :key="info.id">
                   <v-col cols="3">
-                    <v-checkbox> </v-checkbox>
+
                   </v-col>
                   <v-col cols="4">
                     <div>
@@ -111,30 +110,31 @@
                       <v-icon>mdi-delete </v-icon>Excluir
                     </v-btn>
                   </v-col>
+
                 </v-row>
               </v-expansion-panel-header>
-              <v-expansion-panel-content>
+              <v-divider color="#4DC3C8"></v-divider>
+              <v-expansion-panel-content>                  
                 <v-row v-for="AlimentoRef in AlimentosRefs" :key="AlimentoRef.id">
-                  <div v-if="refeicao.idRefeicao == AlimentoRef.CardapioRefeiçãoAliment"></div>
+                  
                   <v-col cols="4">
                     <ul>
-                      
+                      <div v-if="refeicao.idRefeicao == AlimentoRef.RefeicaoAliment">
                       <li>{{ AlimentoRef.NomeAlimento }} ({{ AlimentoRef.PorcaoAlimento }})</li>
-
+                      </div>
                     </ul>
                   </v-col>
-                  <v-col cols="2">
-                    {{ AlimentoRef.PesoAlimento }}
+                  <v-col cols="4">
+                    <h5>Peso por Porção:</h5>
+                    {{ AlimentoRef.PesoAlimento }} gramas
                   </v-col>
-                  <v-col cols="3">
-                    {{ AlimentoRef.CaloriasAlimento }}
+                  <v-col cols="4">
+                    <h5>Calorias por Porção:</h5>
+                    {{ AlimentoRef.CaloriasAlimento }} cals
                   </v-col>
-                  <v-col cols="3">
-                    {{ AlimentoRef.CaloriasAlimento }}
-                    {{ AlimentoRef.CaloriasAlimento }}
-                    {{ AlimentoRef.CaloriasAlimento }}
-                  </v-col>
-                </v-row>
+
+                </v-row>                  
+
               </v-expansion-panel-content>
             </v-expansion-panel>
           </v-expansion-panels>
@@ -200,7 +200,7 @@
 
               <v-row>
                 <v-col cols="12" sm="4">
-                  <v-btn color="#4DC3C8" @click="puxaralimentosref()">
+                  <v-btn color="#4DC3C8" @click="fecharalimentos()">
                     <v-icon>mdi-plus</v-icon> Adiconar Alimentos
                   </v-btn>
                 </v-col>
@@ -234,14 +234,14 @@ export default {
       infoAlimentosall:[{}],
       AlimentosRefs: [{}],
       Alertaerro: false,
-      Nrefs: 2,
+      Nrefs: 0,
       Campotitulo: "",
       formRefs: false,
       formAlimentos: false,
       dialog: false,
       alertInvalidInfo: false,
       invalidInfo: false,
-      CampoHoraRef: "",
+
       AvisoMaxRefs: false,
       idAlimentosAll: "",
       idcardapiolog:"",
@@ -332,7 +332,7 @@ export default {
   mounted() {
     
     this.puxarrefeicoes();
-    this.puxaralimentosref ();
+    this.puxaralimentosref();
     this.puxarcardapio();
  
   },
@@ -342,15 +342,16 @@ export default {
         this.uid = fb.auth.currentUser.uid;
       const CardsUser = await fb.CardapioCollection.where("DonoCardapio", "==", this.uid).where("Estaativo", "==", true).get();
       CardsUser.forEach(doc => {
-
           this.infosCardapios.push({
           Titulocard: doc.data().NomeCardapio,
           ComentarioCard: doc.data().ComentarioCardapio,
           IdCardapio: doc.data().idCardapio,
           EstaAtivo: doc.data().Estaativo,
           Numrefs: doc.data().NumeroRefs,
-        })
-        })
+        });
+        this.Nrefs= doc.data().NumeroRefs
+        });
+
     },
     async puxarrefeicoes() {
       this.Refeicoes = [],
@@ -372,30 +373,37 @@ export default {
         })
 
     },
-    async puxaralimentosref (){
+    async puxaralimentosref (idRefeicao){
       this.AlimentosRefs = [];
       const CardsUser = await fb.CardapioCollection.where("DonoCardapio", "==", this.uid).where("Estaativo", "==", true).get();
       CardsUser.forEach(doc => {
         this.idcardapiolog = doc.data().idCardapio
-        console.log(this.idcardapiolog)
 
         });
-     const refscard =  await fb.CardapioCollection.doc(this.idcardapiolog).collection("Refeicoes").get();
-     refscard.forEach((doc)=>{
+       const refuser = await fb.CardapioCollection.doc(this.idcardapiolog).collection("Refeicoes").get();
+       refuser.forEach((doc)=>{
       this.idRefeicaolog = doc.data().idRefeicao
-        console.log(this.idRefeicaolog)
+        console.log(doc.data())
         });
-        await fb.CardapioCollection.doc(this.idcardapiolog).collection("Refeicoes").doc(this.idRefeicaolog).collection("Alimentoseparado").get().then((querySnapshot) => {
+
+        await fb.CardapioCollection.doc(this.idcardapiolog).collection("Refeicoes").doc(idRefeicao).collection("Alimentoseparado").get().then((querySnapshot) => {
         querySnapshot.forEach((doc)=>{
-          console.log(`${doc.id} => ${doc.data().NomeAlimento},${doc.data().CardapioRefeiçãoAliment}`);
+          console.log(`${doc.id} => ${doc.data().NomeAlimento},${doc.data().RefeicaoAliment}`);
           this.AlimentosRefs.push({
             NomeAlimento: doc.data().NomeAlimento,
             AlimentoRefeicaoDono: doc.data().AlimentoRefeicaoDono,
             PorcaoAlimento: doc.data().PorcaoAlimento,
-            CardapioRefeiçãoAliment: doc.data().CardapioRefeiçãoAliment,
+            RefeicaoAliment: doc.data().RefeicaoAliment,
+            PesoAlimento: doc.data().PesoAlimento,
+            CaloriasAlimento: doc.data().CaloriasAlimento,
           })
         })
-      })
+      });
+      this.idRefeicaolog = idRefeicao
+    },
+    async fecharalimentos(){
+      this.formAlimentos = false;
+      this.puxaralimentosref();
     },
     async FuncAddRefeicao(IdCardapio, NumRefs) {
       if (this.Campotitulo == null || this.Campotitulo == '') {
@@ -411,7 +419,6 @@ export default {
         const res = await fb.CardapioCollection.doc(IdCardapio).collection("Refeicoes").add({
           DonoRefeicao: this.uid,
           NomeRefeicao: this.Campotitulo,
-          HorarioRefeicao: this.CampoHoraRef,
           idCardrefeicao: IdCardapio,
         });
         const idRefeicao = res.id
@@ -422,11 +429,10 @@ export default {
           NumeroRefs: NumRefs + 1
         })
       }
-      NumRefs = NumRefs + 1;
+      this.Nrefs = this.Nrefs + 1;
       this.puxarrefeicoes();
       this.puxarcardapio();
       this.Campotitulo = "";
-      this.CampoHoraRef = "";
       this.formRefs = false;
 
     },
@@ -447,37 +453,11 @@ export default {
     },
     async excluirRefeicao(NumRefs, idRefeicao) {
     await deleteDoc(doc(fb.CardapioCollection.doc(this.idcardapiolog).collection("Refeicoes"), idRefeicao));
-    if(NumRefs = 1){
+    if(this.Nrefs != 0){
           await fb.CardapioCollection.doc(this.idcardapiolog).update({
-          NumeroRefs: 0
+          NumeroRefs: this.Nrefs - 1
         });
-    } else;
-     
-     if(NumRefs = 2){
-          await fb.CardapioCollection.doc(this.idcardapiolog).update({
-          NumeroRefs: 2 - 1
-        });   
-     } else;
-      
-     if(NumRefs = 3){
-          await fb.CardapioCollection.doc(this.idcardapiolog).update({
-          NumeroRefs: 3 - 1
-        });     
-    } else; 
-     
-     if(NumRefs = 4){
-          await fb.CardapioCollection.doc(this.idcardapiolog).update({
-          NumeroRefs: 4 -1
-        });     
-    } else; 
-     
-    if(NumRefs = 5){
-          await fb.CardapioCollection.doc(this.idcardapiolog).update({
-          NumeroRefs: 5 -1
-        });
-
-
-        
+        this.Nrefs = this.Nrefs - 1
     }
     this.puxarcardapio();
     this.puxarrefeicoes();
@@ -508,8 +488,7 @@ export default {
             GorduraAlimento: alimento.gorduras,
             PorcaoAlimento: (alimento.porcao = 1),
             Id: alimento.id,
-
-            CardapioRefeiçãoAliment: IdCardapio
+            RefeicaoAliment: this.idRefeicaolog,
         })
         const idAlimento = res.id
         await fb.CardapioCollection.doc(IdCardapio).collection("Refeicoes").doc(this.idRefeicaolog).collection("Alimentoseparado").doc(idAlimento).set({
@@ -523,8 +502,7 @@ export default {
             GorduraAlimento: alimento.gorduras,
             PorcaoAlimento: (alimento.porcao = 1),
             Id: alimento.id,
-
-            CardapioRefeiçãoAliment: IdCardapio
+            RefeicaoAliment: this.idRefeicaolog,
         })
         this.idAlimentolog = idAlimento
       }
@@ -540,8 +518,7 @@ export default {
             GorduraAlimento: alimento.gorduras,
             PorcaoAlimento: (alimento.porcao + 1),
             Id: alimento.id,
-            AlimentoRefeicaoDono: this.idRefeicaolog,
-            CardapioRefeiçãoAliment: IdCardapio
+            RefeicaoAliment: this.idRefeicaolog,
         })
 
           alimento.porcao = alimento.porcao + 1
@@ -560,8 +537,7 @@ export default {
             GorduraAlimento: alimento.gorduras,
             PorcaoAlimento: (alimento.porcao - 1),
             Id: alimento.id,
-            AlimentoRefeicaoDono: this.idRefeicaolog,
-            CardapioRefeiçãoAliment: IdCardapio
+            RefeicaoAliment: this.idRefeicaolog,
         })
 
           alimento.porcao = alimento.porcao - 1
