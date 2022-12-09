@@ -84,12 +84,11 @@
       <v-col cols="10">
         <v-alert transition="scale-transition" v-model="alertInvalidInfo" dismissible outlined>O campo "Nome do
           Cardapio" é obrigatório</v-alert>
-        <div v-for="info in infosCardapios" :key="info.id">
+        <div>
           <v-expansion-panels>
             <v-expansion-panel v-for="refeicao in Refeicoes" :key="refeicao.id">
-              <div v-if="refeicao.idCardrefeicao == info.idCardapio"></div>
               <v-expansion-panel-header>
-                <v-row>
+                <v-row v-for="info in infosCardapios" :key="info.id">
                   <v-col cols="3">
                     <v-checkbox> </v-checkbox>
                   </v-col>
@@ -108,7 +107,7 @@
                   </v-col>
                   <v-col cols="1"></v-col>
                   <v-col cols="1">
-                    <v-btn color="#B2DFE1" max-width="140px" @click="excluirRefeicao(refeicao.idRefeicao)">
+                    <v-btn color="#B2DFE1" max-width="140px" @click="excluirRefeicao(info.NumRefs, refeicao.idRefeicao)">
                       <v-icon>mdi-delete </v-icon>Excluir
                     </v-btn>
                   </v-col>
@@ -116,10 +115,12 @@
               </v-expansion-panel-header>
               <v-expansion-panel-content>
                 <v-row v-for="AlimentoRef in AlimentosRefs" :key="AlimentoRef.id">
-                  <div v-if="AlimentoRef.AlimentoRefeicaoDono == refeicao.idRefeicao">
+                  <div v-if="refeicao.idRefeicao == AlimentoRef.CardapioRefeiçãoAliment"></div>
                   <v-col cols="4">
                     <ul>
+                      
                       <li>{{ AlimentoRef.NomeAlimento }} ({{ AlimentoRef.PorcaoAlimento }})</li>
+
                     </ul>
                   </v-col>
                   <v-col cols="2">
@@ -133,7 +134,6 @@
                     {{ AlimentoRef.CaloriasAlimento }}
                     {{ AlimentoRef.CaloriasAlimento }}
                   </v-col>
-                </div>
                 </v-row>
               </v-expansion-panel-content>
             </v-expansion-panel>
@@ -151,7 +151,7 @@
               <v-row>
                 <v-col>
 
-                  <div>
+                  <div v-for="info in infosCardapios" :key="info.id">
                     <v-card v-for="alimento in Alimentos" :key="alimento.id" shaped>
                       <v-row class="infoalimentos">
                         <v-col cols="3">
@@ -170,11 +170,11 @@
                             <h4>Porções:</h4>
                           </v-card-subtitle>
                           <v-card-subtitle>
-                            <v-btn color="#B2DFE1" text @click="TirarAlimentoEspecif(alimento)">
+                            <v-btn color="#B2DFE1" text @click="TirarAlimentoEspecif(alimento,info.IdCardapio)">
                               <v-icon>mdi-minus</v-icon>
                             </v-btn>
                             <v-btn text>{{ alimento.porcao }}</v-btn>
-                            <v-btn color="#4DC3C8" text @click="AddAlimentoEspecif(alimento)">
+                            <v-btn color="#4DC3C8" text @click="AddAlimentoEspecif(alimento,info.IdCardapio)">
                               <v-icon>mdi-plus</v-icon>
                             </v-btn>
                           </v-card-subtitle>
@@ -222,7 +222,7 @@
 
 <script>
 import * as fb from '@/plugins/firebase';
-import { doc, deleteDoc, collection, where, getDocs, query} from "firebase/firestore";
+import { db,doc, deleteDoc, collection, where, getDocs, query} from "firebase/firestore";
 import Alimento from "../components/Alimento.vue";
 export default {
   props: ["titulo"],
@@ -244,6 +244,7 @@ export default {
       CampoHoraRef: "",
       AvisoMaxRefs: false,
       idAlimentosAll: "",
+      idcardapiolog:"",
       idRefeicaolog:"",
       idAlimentolog: "",
       infosCardapios: [{
@@ -330,26 +331,71 @@ export default {
   },
   mounted() {
     
-    
-    this.puxarcardapio();
     this.puxarrefeicoes();
-    this.puxaralimentosall();
-    this.puxaralimentosref();
+    this.puxaralimentosref ();
+    this.puxarcardapio();
+ 
   },
   methods: {
     async puxarcardapio() {
       this.infosCardapios = [],
         this.uid = fb.auth.currentUser.uid;
       const CardsUser = await fb.CardapioCollection.where("DonoCardapio", "==", this.uid).where("Estaativo", "==", true).get();
-      for (const doc of CardsUser.docs) {
-        this.infosCardapios.push({
+      CardsUser.forEach(doc => {
+
+          this.infosCardapios.push({
           Titulocard: doc.data().NomeCardapio,
           ComentarioCard: doc.data().ComentarioCardapio,
           IdCardapio: doc.data().idCardapio,
           EstaAtivo: doc.data().Estaativo,
-          Numrefs: doc.data().NumeroRefs
+          Numrefs: doc.data().NumeroRefs,
         })
-      }
+        })
+    },
+    async puxarrefeicoes() {
+      this.Refeicoes = [],
+      this.uid = fb.auth.currentUser.uid;
+      const CardsUser = await fb.CardapioCollection.where("DonoCardapio", "==", this.uid).where("Estaativo", "==", true).get();
+      CardsUser.forEach(doc => {
+        this.idcardapiolog = doc.data().idCardapio
+        console.log(this.idcardapiolog)
+
+        });
+     const refscard =  await fb.CardapioCollection.doc(this.idcardapiolog).collection("Refeicoes").get();
+     refscard.forEach((doc)=>{
+          console.log(`${doc.id} => ${doc.data().NomeRefeicao} `);
+
+          this.Refeicoes.push({
+            TituloRef: doc.data().NomeRefeicao,
+            idRefeicao: doc.data().idRefeicao
+          })
+        })
+
+    },
+    async puxaralimentosref (){
+      this.AlimentosRefs = [];
+      const CardsUser = await fb.CardapioCollection.where("DonoCardapio", "==", this.uid).where("Estaativo", "==", true).get();
+      CardsUser.forEach(doc => {
+        this.idcardapiolog = doc.data().idCardapio
+        console.log(this.idcardapiolog)
+
+        });
+     const refscard =  await fb.CardapioCollection.doc(this.idcardapiolog).collection("Refeicoes").get();
+     refscard.forEach((doc)=>{
+      this.idRefeicaolog = doc.data().idRefeicao
+        console.log(this.idRefeicaolog)
+        });
+        await fb.CardapioCollection.doc(this.idcardapiolog).collection("Refeicoes").doc(this.idRefeicaolog).collection("Alimentoseparado").get().then((querySnapshot) => {
+        querySnapshot.forEach((doc)=>{
+          console.log(`${doc.id} => ${doc.data().NomeAlimento},${doc.data().CardapioRefeiçãoAliment}`);
+          this.AlimentosRefs.push({
+            NomeAlimento: doc.data().NomeAlimento,
+            AlimentoRefeicaoDono: doc.data().AlimentoRefeicaoDono,
+            PorcaoAlimento: doc.data().PorcaoAlimento,
+            CardapioRefeiçãoAliment: doc.data().CardapioRefeiçãoAliment,
+          })
+        })
+      })
     },
     async FuncAddRefeicao(IdCardapio, NumRefs) {
       if (this.Campotitulo == null || this.Campotitulo == '') {
@@ -362,49 +408,32 @@ export default {
       if (this.invalidInfo == true) {
 
         this.uid = fb.auth.currentUser.uid;
-        const res = await fb.RefeicaoCollection.add({
+        const res = await fb.CardapioCollection.doc(IdCardapio).collection("Refeicoes").add({
           DonoRefeicao: this.uid,
           NomeRefeicao: this.Campotitulo,
           HorarioRefeicao: this.CampoHoraRef,
           idCardrefeicao: IdCardapio,
         });
         const idRefeicao = res.id
-        await fb.RefeicaoCollection.doc(idRefeicao).update({
+        await fb.CardapioCollection.doc(IdCardapio).collection("Refeicoes").doc(idRefeicao).update({
           idRefeicao: idRefeicao
         });
-
+        await fb.CardapioCollection.doc(IdCardapio).update({
+          NumeroRefs: NumRefs + 1
+        })
       }
-      this.puxarcardapio();
+      NumRefs = NumRefs + 1;
       this.puxarrefeicoes();
+      this.puxarcardapio();
       this.Campotitulo = "";
       this.CampoHoraRef = "";
       this.formRefs = false;
-    },
-    async puxarrefeicoes() {
-      this.Refeicoes = [];
-      this.uid = fb.auth.currentUser.uid;
-      const RefsUser = await fb.RefeicaoCollection.where("DonoRefeicao", "==", this.uid).get();
-      for (const doc of RefsUser.docs) {
-        this.Refeicoes.push({
-          TituloRef: doc.data().NomeRefeicao,
-          HoraRef: doc.data().HorarioRefeicao,
-          idCardrefeicao: doc.data().idCardrefeicao,
-          idRefeicao: doc.data().idRefeicao
-        })
-      }
+
     },
     async AddAlimento(idRefeicao) {
       this.idRefeicaolog = idRefeicao
       this.formAlimentos = true
-    },
-    async Entrarhome() {
-      this.$router.push({ name: "Home" });
-    },
-    async Editarrefs() {
-      this.$router.push({ name: "Refeicoes" });
-    },
-    async NumeroRefs() {
-
+      console.log(this.idRefeicaolog)
     },
     Maxrefs() {
       if ((this.Nerefs = 5)) {
@@ -416,9 +445,42 @@ export default {
     async excluirAlimentosall() {
       this.formAlimentos = false
     },
-    async excluirRefeicao(idRefeicao) {
-      await deleteDoc(doc(fb.RefeicaoCollection, idRefeicao));
-      this.puxarrefeicoes();
+    async excluirRefeicao(NumRefs, idRefeicao) {
+    await deleteDoc(doc(fb.CardapioCollection.doc(this.idcardapiolog).collection("Refeicoes"), idRefeicao));
+    if(NumRefs = 1){
+          await fb.CardapioCollection.doc(this.idcardapiolog).update({
+          NumeroRefs: 0
+        });
+    } else;
+     
+     if(NumRefs = 2){
+          await fb.CardapioCollection.doc(this.idcardapiolog).update({
+          NumeroRefs: 2 - 1
+        });   
+     } else;
+      
+     if(NumRefs = 3){
+          await fb.CardapioCollection.doc(this.idcardapiolog).update({
+          NumeroRefs: 3 - 1
+        });     
+    } else; 
+     
+     if(NumRefs = 4){
+          await fb.CardapioCollection.doc(this.idcardapiolog).update({
+          NumeroRefs: 4 -1
+        });     
+    } else; 
+     
+    if(NumRefs = 5){
+          await fb.CardapioCollection.doc(this.idcardapiolog).update({
+          NumeroRefs: 5 -1
+        });
+
+
+        
+    }
+    this.puxarcardapio();
+    this.puxarrefeicoes();
     },
     async puxaralimentosall(){
       this.infoAlimentosall = [],
@@ -433,10 +495,10 @@ export default {
         this.idAlimentosAll = doc.data().idAlimentosAll
       }
     },
-    async AddAlimentoEspecif(alimento) {
+    async AddAlimentoEspecif(alimento,IdCardapio) {
       this.uid = fb.auth.currentUser.uid;
       if (alimento.porcao == 0) {
-        const res = await fb.RefeicaoCollection.doc(this.idRefeicaolog).collection("Alimentoseparado").add({
+        const res = await fb.CardapioCollection.doc(IdCardapio).collection("Refeicoes").doc(this.idRefeicaolog).collection("Alimentoseparado").add({
             DonoAlimento: this.uid,
             NomeAlimento: alimento.titulo,
             PesoAlimento: alimento.peso,
@@ -446,11 +508,11 @@ export default {
             GorduraAlimento: alimento.gorduras,
             PorcaoAlimento: (alimento.porcao = 1),
             Id: alimento.id,
-            AlimentoRefeicaoDono: this.idRefeicaolog
 
+            CardapioRefeiçãoAliment: IdCardapio
         })
         const idAlimento = res.id
-        await fb.RefeicaoCollection.doc(this.idRefeicaolog).collection("Alimentoseparado").doc(idAlimento).set({
+        await fb.CardapioCollection.doc(IdCardapio).collection("Refeicoes").doc(this.idRefeicaolog).collection("Alimentoseparado").doc(idAlimento).set({
           idAlimento: idAlimento,
           DonoAlimento: this.uid,
             NomeAlimento: alimento.titulo,
@@ -461,12 +523,13 @@ export default {
             GorduraAlimento: alimento.gorduras,
             PorcaoAlimento: (alimento.porcao = 1),
             Id: alimento.id,
-            AlimentoRefeicaoDono: this.idRefeicaolog
+
+            CardapioRefeiçãoAliment: IdCardapio
         })
         this.idAlimentolog = idAlimento
       }
       else {
-        await fb.RefeicaoCollection.doc(this.idRefeicaolog).collection("Alimentoseparado").doc(this.idAlimentolog).set({
+        await fb.CardapioCollection.doc(IdCardapio).collection("Refeicoes").doc(this.idRefeicaolog).collection("Alimentoseparado").doc(this.idAlimentolog).set({
           idAlimento: this.idAlimentolog,
           DonoAlimento: this.uid,
             NomeAlimento: alimento.titulo,
@@ -477,15 +540,16 @@ export default {
             GorduraAlimento: alimento.gorduras,
             PorcaoAlimento: (alimento.porcao + 1),
             Id: alimento.id,
-            AlimentoRefeicaoDono: this.idRefeicaolog
+            AlimentoRefeicaoDono: this.idRefeicaolog,
+            CardapioRefeiçãoAliment: IdCardapio
         })
 
           alimento.porcao = alimento.porcao + 1
 
       }
     },
-    async TirarAlimentoEspecif(alimento) {
-      await fb.RefeicaoCollection.doc(this.idRefeicaolog).collection("Alimentoseparado").doc(this.idAlimentolog).set({
+    async TirarAlimentoEspecif(alimento,IdCardapio) {
+      await fb.CardapioCollection.doc(IdCardapio).collection("Refeicoes").collection("Alimentoseparado").doc(this.idAlimentolog).set({
           idAlimento: this.idAlimentolog,
           DonoAlimento: this.uid,
             NomeAlimento: alimento.titulo,
@@ -496,23 +560,13 @@ export default {
             GorduraAlimento: alimento.gorduras,
             PorcaoAlimento: (alimento.porcao - 1),
             Id: alimento.id,
-            AlimentoRefeicaoDono: this.idRefeicaolog
+            AlimentoRefeicaoDono: this.idRefeicaolog,
+            CardapioRefeiçãoAliment: IdCardapio
         })
 
           alimento.porcao = alimento.porcao - 1
     },
-    async puxaralimentosref (){
-      this.AlimentosRefs = [],
-      fb.RefeicaoCollection.doc(this.idRefeicaolog).collection("Alimentoseparado").get().then((querySnapshot) => {
-        querySnapshot.forEach((doc)=>{
-          console.log(`${doc.id} => ${doc.data().NomeAlimento},${doc.data().AlimentoRefeicaoDono}`);
-          this.AlimentosRefs.push({
-            NomeAlimento: doc.data().NomeAlimento,
-            AlimentoRefeicaoDono: doc.data().AlimentoRefeicaoDono,
-          })
-        })
-      })
-    },
+
 }
 }
 </script>

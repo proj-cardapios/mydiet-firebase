@@ -2,19 +2,18 @@
   <v-container fluid class="body">
         <v-row class="row">
           <v-col cols="1"></v-col>
-        <v-col cols="5" class="pt-3 ctexto">     
+        <v-col cols="5" class="pt-16 ctexto">     
     <v-card-text>
-      <h1>Monte seu cardápio com
+      <h1 class="titulologin">Monte seu cardápio </h1>
+        <h1 class="titulologin">com
          base no seu objetivo</h1>
     </v-card-text>
-
-    <v-card-text class="subtitle">
-      <h2>quem somos?</h2>
-      <h4>Esse site foi criado com o objetivo de ajudar as pessoas, que não tem condições de ter um nutricionista, a alcançar seu objetivo. Aqui você pode escolher entre ganhar, manter ou perder peso e de acordo com as suas informações iremos gerar a quantidade de calorias que você pode ingerir no dia para conquistar o que deseja.</h4>
+    <v-card-text class="subtitle1">
+            <h2>quem somos?</h2>
     </v-card-text>
     <v-card-text class="subtitle">
-      <h2>como funciona?</h2>
-      <h4>Após inserir as informações necessárias, nosso sistema irá gerar a quantidade de calorias que você pode ingerir no dia baseado na sua taxa metabólica basal. A partir disso, você terá o livre arbítrio para escolher as opções disponíveis disponíveis do nossos alimentos medidos em gramas para escolher o que irá comer no decorrer do dia para manter suas calorias consumidas no seu limite.</h4>
+
+      <h4>Este site foi criado com o objetivo de ajudar as pessoas, que não tem condições de ter um nutricionista, a alcançar seu objetivo. Aqui você pode escolher entre ganhar, manter ou perder peso e de acordo com as suas informações iremos gerar a quantidade de calorias que você pode ingerir no dia para conquistar o que deseja.</h4>
     </v-card-text>
     </v-col>
     <v-col cols="2"></v-col>
@@ -119,6 +118,15 @@ export default {
 </script>
 
 <style scoped>
+.subtitle1{
+  text-align: start;
+  padding-left: 2rem;
+}
+.titulologin{
+  font-family:'Courier New', Courier, monospace 'Arial Narrow', Arial, sans-serif;
+  font-size:xx-large;
+  padding-bottom: 1rem;
+}
 
 .ctexto {
   padding-left: 3rem;

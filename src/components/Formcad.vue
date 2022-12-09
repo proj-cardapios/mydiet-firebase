@@ -21,19 +21,6 @@
       <v-text-field label="Peso" outlined v-model="user.peso"></v-text-field>
       <v-text-field label="Altura" outlined v-model="user.altura"></v-text-field>
     </v-form>
-    <h3>Alergias</h3>
-    <v-checkbox
-      v-model="user.gluten"
-      :label="`Gluten`"
-    ></v-checkbox>
-    <v-checkbox
-      v-model="user.lactose"
-      :label="`Lactose`"
-    ></v-checkbox>
-    <v-checkbox
-      v-model="user.frutos"
-      :label="`Frutos do Mar`"
-    ></v-checkbox>
     </div>
     <v-row class="botoes">
       <v-col cols="3">
