@@ -353,7 +353,7 @@ export default {
           id: 16,
           titulo: "Macarrão Cozido",
           peso: 100,
-          calorias: 150,
+          calorias: 155,
           porcao: 0,
         },
       ],
