@@ -40,7 +40,7 @@
         <v-card-subtitle>
           <div v-for="info in infosCardapios" :key="info.id">
             <h4>Numero de refeições:</h4>
-            <h4> {{Nrefs}}/5</h4>
+            <h4> {{Nrefs}}</h4>
           </div>
         </v-card-subtitle>
       </v-col>
@@ -72,7 +72,7 @@
             </v-container>
           </v-form>
         </v-alert>
-        <v-alert class="formcardapio" transition="scale-transition" v-show="AvisoMaxRefs" elevation="6" outlined shaped>
+        <v-alert class="formcardapio" transition="scale-transition" v-show="alertMaxrefs" elevation="6" outlined shaped>
           <h1>Ja atingido numero maximo de refeições</h1>
         </v-alert>
       </v-col>
@@ -150,19 +150,12 @@
             <v-container>
               <v-row>
                 <v-col>
-
                   <div v-for="info in infosCardapios" :key="info.id">
-                    <v-card v-for="alimento in Alimentos" :key="alimento.id" shaped>
+                    <v-card class="alimentoscatainers" v-for="alimento in Alimentos" :key="alimento.id" shaped>
                       <v-row class="infoalimentos">
                         <v-col cols="3">
                           <v-card-subtitle>
                             <h2 class="alimentocard">{{ alimento.titulo }}</h2>
-                          </v-card-subtitle>
-                          <v-card-subtitle>
-                            Peso/Porção: {{ alimento.peso }} gramas
-                          </v-card-subtitle>
-                          <v-card-subtitle>
-                            Caloria: {{ alimento.calorias }} cal
                           </v-card-subtitle>
                         </v-col>
                         <v-col cols="4">
@@ -181,13 +174,10 @@
                         </v-col>
                         <v-col cols="3">
                           <v-card-subtitle>
-                            Gorduras:
+                            <h4>Peso/Porção: {{ alimento.peso }} gramas</h4>
                           </v-card-subtitle>
                           <v-card-subtitle>
-                            Proteínas:
-                          </v-card-subtitle>
-                          <v-card-subtitle>
-                            Carboidratos:
+                            <h4>Calorias: {{ alimento.calorias }} cal/porção</h4>
                           </v-card-subtitle>
                         </v-col>
                       </v-row>
@@ -241,8 +231,7 @@ export default {
       dialog: false,
       alertInvalidInfo: false,
       invalidInfo: false,
-
-      AvisoMaxRefs: false,
+      alertMaxrefs: false,
       idAlimentosAll: "",
       idcardapiolog:"",
       idRefeicaolog:"",
@@ -256,77 +245,118 @@ export default {
       Alimentos: [
         {
           id: 1,
-          titulo: "feijão",
-          peso: 50,
-          calorias: 90,
+          titulo: "Feijão",
+          peso: 100 ,
+          calorias: 91,
           porcao: 0,
-          proteinas: 50,
-          carboidratos: 339,
-          gorduras: 86,
         },
         {
           id: 2,
-          titulo: "arroz",
-          peso: 50,
-          calorias: 70,
+          titulo: "Arroz",
+          peso: 100,
+          calorias: 130 ,
           porcao: 0,
-          proteinas: 50,
-          carboidratos: 339,
-          gorduras: 86,
         },
         {
           id: 3,
           titulo: "Alface",
-          peso: 40,
-          calorias: 50,
+          peso: 100,
+          calorias: 16,
           porcao: 0,
-          proteinas: 50,
-          carboidratos: 339,
-          gorduras: 86,
         },
         {
           id: 4,
-          titulo: "batata cozida",
-          peso: 50,
-          calorias: 80,
+          titulo: "Batata Cozida",
+          peso: 100,
+          calorias: 87,
           porcao: 0,
-          proteinas: 50,
-          carboidratos: 339,
-          gorduras: 86,
+
         },
         {
           id: 5,
-          titulo: "Beterraba",
-          peso: 50,
-          calorias: 80,
+          titulo: "Beterraba Cozida",
+          peso: 100,
+          calorias: 44,
           porcao: 0,
-          proteinas: 50,
-          carboidratos: 339,
-          gorduras: 86,
         },
         {
           id: 6,
-          titulo: "cenoura cozida",
-          peso: 50,
-          calorias: 80,
+          titulo: "Cenoura Cozida",
+          peso: 70,
+          calorias: 40,
           porcao: 0,
-          proteinas: 50,
-          carboidratos: 339,
-          gorduras: 86,
         },
         {
           id: 7,
-          titulo: "aipim cozido",
-          peso: 50,
-          calorias: 80,
+          titulo: "Aipim Cozido",
+          peso: 100,
+          calorias: 120,
           porcao: 0,
-          proteinas: 50,
-          carboidratos: 339,
-          gorduras: 86,
+        },
+        {
+          id: 8,
+          titulo: "Ovo Cozido",
+          peso: 100,
+          calorias: 155,
+          porcao: 0,
+        },
+        {
+          id: 9,
+          titulo: "Ovo Frito",
+          peso: 50,
+          calorias: 118,
+          porcao: 0,
+        },
+        {
+          id: 10,
+          titulo: "Repolho Cozido",
+          peso: 100,
+          calorias: 27,
+          porcao: 0,
+        },
+        {
+          id: 11,
+          titulo: "Filé de Peixe",
+          peso: 100,
+          calorias: 115,
+          porcao: 0,
+        },
+        {
+          id: 12,
+          titulo: "Peito de Frango",
+          peso: 100,
+          calorias: 170,
+          porcao: 0,
+        },
+        {
+          id: 13,
+          titulo: "Batata Doce Roxa Cozida",
+          peso: 100,
+          calorias: 95,
+          porcao: 0,
+        },
+        {
+          id: 14,
+          titulo: "Tomate",
+          peso: 100,
+          calorias: 25,
+          porcao: 0,
+        },
+        {
+          id: 15,
+          titulo: "Carne Moída",
+          peso: 100,
+          calorias: 260,
+          porcao: 0,
+        },
+        {
+          id: 16,
+          titulo: "Macarrão Cozido",
+          peso: 100,
+          calorias: 150,
+          porcao: 0,
         },
       ],
-
-
     };
   },
   mounted() {
@@ -351,7 +381,6 @@ export default {
         });
         this.Nrefs= doc.data().NumeroRefs
         });
-
     },
     async puxarrefeicoes() {
       this.Refeicoes = [],
@@ -403,6 +432,7 @@ export default {
     },
     async fecharalimentos(){
       this.formAlimentos = false;
+      this.Alimentos.porcao = 0;
       this.puxaralimentosref();
     },
     async FuncAddRefeicao(IdCardapio, NumRefs) {
@@ -413,7 +443,7 @@ export default {
       else {
         this.invalidInfo = true
       }
-      if (this.invalidInfo == true) {
+      if (this.invalidInfo == true ) {
 
         this.uid = fb.auth.currentUser.uid;
         const res = await fb.CardapioCollection.doc(IdCardapio).collection("Refeicoes").add({
@@ -428,8 +458,10 @@ export default {
         await fb.CardapioCollection.doc(IdCardapio).update({
           NumeroRefs: NumRefs + 1
         })
-      }
-      this.Nrefs = this.Nrefs + 1;
+        this.alertMaxrefs = false
+      };
+      
+
       this.puxarrefeicoes();
       this.puxarcardapio();
       this.Campotitulo = "";
@@ -483,9 +515,6 @@ export default {
             NomeAlimento: alimento.titulo,
             PesoAlimento: alimento.peso,
             CaloriasAlimento: alimento.calorias,
-            ProeinasAlimento: alimento.proteinas,
-            CarboidratosAlimento: alimento.carboidratos,
-            GorduraAlimento: alimento.gorduras,
             PorcaoAlimento: (alimento.porcao = 1),
             Id: alimento.id,
             RefeicaoAliment: this.idRefeicaolog,
@@ -497,9 +526,6 @@ export default {
             NomeAlimento: alimento.titulo,
             PesoAlimento: alimento.peso,
             CaloriasAlimento: alimento.calorias,
-            ProeinasAlimento: alimento.proteinas,
-            CarboidratosAlimento: alimento.carboidratos,
-            GorduraAlimento: alimento.gorduras,
             PorcaoAlimento: (alimento.porcao = 1),
             Id: alimento.id,
             RefeicaoAliment: this.idRefeicaolog,
@@ -513,9 +539,6 @@ export default {
             NomeAlimento: alimento.titulo,
             PesoAlimento: alimento.peso,
             CaloriasAlimento: alimento.calorias,
-            ProeinasAlimento: alimento.proteinas,
-            CarboidratosAlimento: alimento.carboidratos,
-            GorduraAlimento: alimento.gorduras,
             PorcaoAlimento: (alimento.porcao + 1),
             Id: alimento.id,
             RefeicaoAliment: this.idRefeicaolog,
@@ -526,15 +549,12 @@ export default {
       }
     },
     async TirarAlimentoEspecif(alimento,IdCardapio) {
-      await fb.CardapioCollection.doc(IdCardapio).collection("Refeicoes").collection("Alimentoseparado").doc(this.idAlimentolog).set({
+      await fb.CardapioCollection.doc(IdCardapio).collection("Refeicoes").doc(this.idRefeicaolog).collection("Alimentoseparado").doc(this.idAlimentolog).set({
           idAlimento: this.idAlimentolog,
           DonoAlimento: this.uid,
             NomeAlimento: alimento.titulo,
             PesoAlimento: alimento.peso,
             CaloriasAlimento: alimento.calorias,
-            ProeinasAlimento: alimento.proteinas,
-            CarboidratosAlimento: alimento.carboidratos,
-            GorduraAlimento: alimento.gorduras,
             PorcaoAlimento: (alimento.porcao - 1),
             Id: alimento.id,
             RefeicaoAliment: this.idRefeicaolog,
@@ -548,6 +568,9 @@ export default {
 </script>
 
 <style>
+.alimentoscatainers {
+  margin-top: 3rem;
+}
 .infocard {
   text-align: center;
 }
